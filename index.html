@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Search Readiness Score — Alianza Connects</title>
+  <meta name="description" content="Free comprehensive analysis of how your website performs across Traditional Search, AI Search, Voice Search, and Local Search.">
+
+  <!-- Preconnect for fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="./base.css">
+  <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+
+  <!-- ========== HEADER ========== -->
+  <header class="site-header">
+    <div class="header-inner">
+      <a href="#" class="logo" id="logoLink">
+        ALIANZA<span class="logo-dot"></span>
+      </a>
+      <div class="header-meta" id="headerMeta">
+        <a href="https://www.perplexity.ai/computer/a/alianza-admin-dashboard-jZaeKrbVRNmO003PyHhfOA" target="_blank" rel="noopener noreferrer" class="admin-link" id="adminLink">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>
+          Admin
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- ========== LANDING VIEW ========== -->
+  <main id="landingView" class="view landing active">
+    <div class="landing-card">
+      <span class="landing-badge">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+        Free Analysis
+      </span>
+      <h1 class="landing-title">How Ready Is Your Business for the Future of Search?</h1>
+      <p class="landing-subtitle">Get a free, comprehensive analysis of how your website performs across Traditional Search, AI Search, Voice Search, and Local Search — in under 60 seconds.</p>
+
+      <form class="url-form" id="urlForm">
+        <input
+          type="url"
+          class="url-input"
+          id="urlInput"
+          placeholder="Enter your website URL (e.g., https://example.com)"
+          required
+          autocomplete="url"
+        >
+        <button type="submit" class="btn-primary" id="analyzeBtn">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+          Analyze My Website
+        </button>
+      </form>
+
+      <!-- Competitor Compare Toggle -->
+      <div class="competitor-toggle-wrap">
+        <button type="button" class="competitor-toggle-link" id="competitorToggle" aria-expanded="false" aria-controls="competitorExpand">
+          or compare with a competitor
+          <svg class="competitor-toggle-arrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
+        <div class="competitor-expand" id="competitorExpand" hidden>
+          <div class="competitor-input-row">
+            <input
+              type="url"
+              class="url-input competitor-url-input"
+              id="competitorUrlInput"
+              placeholder="Competitor URL (e.g., https://competitor.com)"
+              autocomplete="url"
+            >
+          </div>
+          <p class="competitor-hint">We'll scan both sites and show you a side-by-side comparison.</p>
+        </div>
+      </div>
+
+      <div class="category-pills">
+        <div class="category-pill">
+          <div class="pill-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+          </div>
+          <span class="pill-label">Traditional SEO</span>
+        </div>
+        <div class="category-pill">
+          <div class="pill-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a4 4 0 0 0-4 4c0 2 2 3 2 6h4c0-3 2-4 2-6a4 4 0 0 0-4-4z"/><path d="M10 18h4"/><path d="M10 22h4"/></svg>
+          </div>
+          <span class="pill-label">AI Search</span>
+        </div>
+        <div class="category-pill">
+          <div class="pill-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><path d="M12 19v3"/></svg>
+          </div>
+          <span class="pill-label">Voice Search</span>
+        </div>
+        <div class="category-pill">
+          <div class="pill-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 1 1 16 0z"/><circle cx="12" cy="10" r="3"/></svg>
+          </div>
+          <span class="pill-label">Local Search</span>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- ========== COMPARISON VIEW ========== -->
+  <div id="comparisonView" class="view comparison-view">
+
+    <!-- Cache Banner -->
+    <div id="compCacheBanner" class="cache-banner" hidden>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+      Viewing a cached report from <span id="compCacheTime" class="cache-time-text"></span>.
+    </div>
+
+    <!-- Comparison Header -->
+    <section class="comparison-header" id="comparisonHeader">
+      <div class="comparison-vs-row">
+        <div class="comparison-site-label" id="compSiteLabelA">Your Site</div>
+        <div class="comparison-vs-badge">VS</div>
+        <div class="comparison-site-label" id="compSiteLabelB">Competitor</div>
+      </div>
+      <div class="comparison-scores-row">
+        <div class="comparison-overall-score" id="compOverallA">0</div>
+        <div class="comparison-overall-divider"></div>
+        <div class="comparison-overall-score" id="compOverallB">0</div>
+      </div>
+      <div class="comparison-overall-labels">
+        <span class="comparison-overall-verdict" id="compVerdictA"></span>
+        <span></span>
+        <span class="comparison-overall-verdict" id="compVerdictB"></span>
+      </div>
+    </section>
+
+    <!-- Category Bars -->
+    <section class="comparison-bars-section" id="comparisonBars">
+      <h2 class="comparison-bars-title">Score Breakdown</h2>
+      <div class="comparison-bars" id="comparisonBarsGrid"></div>
+    </section>
+
+    <!-- Primary Site Full Report -->
+    <div class="comparison-primary-report">
+      <div class="comparison-report-label">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+        Full Report: Your Site
+      </div>
+
+      <!-- Score Cards -->
+      <div class="score-cards" id="compScoreCards"></div>
+
+      <!-- Detail Sections -->
+      <div id="compDetailSections">
+        <div id="compPerformanceSection" class="detail-section"></div>
+        <div id="compEeatSection" class="detail-section"></div>
+        <div id="compSerpSection" class="detail-section"></div>
+        <div id="compGeoSection" class="detail-section"></div>
+      </div>
+
+      <!-- Stats Infographic -->
+      <section class="stats-section" id="compStatsSection">
+        <h2 class="stats-section-title">The Search Landscape Is Changing</h2>
+        <p class="stats-section-sub">The way people find businesses is transforming. Here's what's happening right now.</p>
+        <div class="stats-grid" id="compStatsGrid"></div>
+        <div class="stats-closing">
+          <p><strong>The businesses that adapt now will own the next decade of search.</strong> Those that wait will wonder where their customers went.</p>
+        </div>
+      </section>
+    </div>
+
+    <!-- Share Section -->
+    <section class="share-section">
+      <div class="share-actions">
+        <button class="btn-share" id="compShareBtn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+          Share This Report
+        </button>
+        <button class="btn-share" id="compPdfBtn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+          Download PDF Report
+        </button>
+        <button class="btn-share" onclick="window.print()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+          Print Report
+        </button>
+      </div>
+    </section>
+  </div>
+
+  <!-- ========== LOADING VIEW ========== -->
+  <div id="loadingView" class="view loading-view">
+    <div class="loading-spinner"></div>
+    <div class="loading-status" id="loadingStatus">Fetching your website...</div>
+    <div class="loading-bar-track">
+      <div class="loading-bar-fill" id="loadingBar"></div>
+    </div>
+    <div class="loading-url" id="loadingUrl"></div>
+  </div>
+
+  <!-- ========== ERROR VIEW ========== -->
+  <div id="errorView" class="view error-view">
+    <div class="error-icon" id="errorIcon">
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4"/><path d="M12 16h.01"/></svg>
+    </div>
+    <h2 class="error-title" id="errorTitle">Analysis Failed</h2>
+    <p class="error-message" id="errorMessage">We couldn't reach this website. Please check the URL and try again.</p>
+    <div id="rateLimitTimer" class="rate-limit-timer" hidden>
+      You can scan again in <span id="rateLimitCountdown" class="countdown-text">24:00:00</span>
+    </div>
+    <button class="btn-secondary" id="tryAgainBtn">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+      Try Again
+    </button>
+  </div>
+
+  <!-- ========== DASHBOARD VIEW ========== -->
+  <div id="dashboardView" class="view dashboard">
+
+    <!-- Cache Banner -->
+    <div id="cacheBanner" class="cache-banner" hidden>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+      Viewing a cached report from <span id="cacheTime" class="cache-time-text"></span>.
+    </div>
+
+    <!-- Report Header -->
+    <section class="report-header" id="reportHeader">
+      <div class="report-meta" id="reportMeta"></div>
+      <div class="report-hero-details" style="margin-top:0.5rem;text-align:center;">
+         <div class="hero-summary" id="heroSummary" style="font-size:1.1rem;font-weight:500;color:var(--color-text-main);margin-bottom:0.25rem;"></div>
+         <div class="hero-location" id="heroLocation" style="font-size:0.9rem;color:var(--color-text-muted);"></div>
+      </div>
+      <div class="overall-score-container" style="flex-direction:row;gap:1.5rem;align-items:center;">
+        <div class="overall-grade-circle" id="overallGrade" style="font-size:4rem;font-weight:800;line-height:1;"></div>
+        <div style="text-align:left;">
+          <div class="overall-score-label" style="font-size:1.2rem;font-weight:600;color:var(--color-text-main);">Overall Search Readiness Grade</div>
+          <div class="overall-score-number" id="overallScoreNumber" style="font-size:1rem;font-weight:500;color:var(--color-text-muted); margin-top:0.25rem;"></div>
+        </div>
+      </div>
+      <div class="overall-verdict" id="overallVerdict"></div>
+    </section>
+
+    <!-- Score Cards -->
+    <div style="text-align:center; font-size:0.85rem; color:var(--color-text-muted); margin-bottom:1rem;">* Benchmark is based on mobile-first indexing on low-end devices.</div>
+    <div class="score-cards" id="scoreCards"></div>
+
+    <!-- New API Panels: Performance, E-E-A-T, SERP, GEO -->
+    <div id="newPanelSections">
+      <div id="performanceSection" class="detail-section"></div>
+      <div id="eeatSection" class="detail-section"></div>
+      <div id="serpSection" class="detail-section"></div>
+      <div id="geoSection" class="detail-section"></div>
+    </div>
+
+    <!-- Legacy Detail Sections: Traditional SEO, Voice, Local -->
+    <div id="detailSections"></div>
+
+    <!-- Stats Infographic -->
+    <section class="stats-section" id="statsSection">
+      <h2 class="stats-section-title">The Search Landscape Is Changing</h2>
+      <p class="stats-section-sub">The way people find businesses is transforming. Here's what's happening right now.</p>
+      <div class="stats-grid" id="statsGrid"></div>
+      <div class="stats-closing">
+        <p><strong>The businesses that adapt now will own the next decade of search.</strong> Those that wait will wonder where their customers went.</p>
+      </div>
+    </section>
+
+    <!-- Share Section -->
+    <section class="share-section">
+      <div class="share-actions">
+        <button class="btn-share" id="shareBtn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+          Share This Report
+        </button>
+        <button class="btn-share" id="pdfBtn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+          Download PDF Report
+        </button>
+        <button class="btn-share" id="printBtn" onclick="window.print()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+          Print Report
+        </button>
+      </div>
+    </section>
+  </div>
+
+  <!-- Share Toast -->
+  <div class="share-toast" id="shareToast">Link copied to clipboard!</div>
+
+  <!-- Footer -->
+  <footer class="site-footer">
+    Powered by <a href="https://alianzaconnects.com" target="_blank" rel="noopener noreferrer">Alianza Connects</a> &mdash; Making businesses visible across every search channel.
+  </footer>
+
+  <!-- ========== LEAD CAPTURE MODAL ========== -->
+  <div id="leadCaptureModal" class="lc-modal" role="dialog" aria-modal="true" aria-labelledby="lcModalTitle">
+    <div class="lc-backdrop"></div>
+    <div class="lc-card">
+      <button type="button" class="lc-close" id="lcCloseBtn" aria-label="Close">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+      <div class="lc-header">
+        <span class="lc-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+        </span>
+        <h2 class="lc-title" id="lcModalTitle">Get Your Free Search Readiness Report</h2>
+        <p class="lc-subtitle">Enter your details below to run your scan.</p>
+      </div>
+      <form id="leadCaptureForm" class="lc-form" novalidate>
+        <div class="lc-field">
+          <label class="lc-label" for="lcName">Full Name</label>
+          <input type="text" id="lcName" name="lcName" class="lc-input" placeholder="Jane Smith" required autocomplete="name">
+        </div>
+        <div class="lc-field">
+          <label class="lc-label" for="lcEmail">Email Address</label>
+          <input type="email" id="lcEmail" name="lcEmail" class="lc-input" placeholder="jane@example.com" required autocomplete="email">
+        </div>
+        <div class="lc-field">
+          <label class="lc-label" for="lcPhone">Phone Number</label>
+          <input type="tel" id="lcPhone" name="lcPhone" class="lc-input" placeholder="(555) 000-0000" required autocomplete="tel">
+        </div>
+        <div class="lc-field">
+          <label class="lc-label" for="lcRole">Role in Company</label>
+          <select id="lcRole" name="lcRole" class="lc-input lc-select" required>
+            <option value="" disabled selected>Select your role…</option>
+            <option value="Owner">Owner</option>
+            <option value="Marketing Manager">Marketing Manager</option>
+            <option value="Operations Manager">Operations Manager</option>
+            <option value="IT/Tech">IT/Tech</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+        <button type="submit" class="btn-primary lc-submit" id="lcSubmitBtn">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+          Run Scan
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <script src="./app.js?v=3" defer></script>
+</body>
+</html>
