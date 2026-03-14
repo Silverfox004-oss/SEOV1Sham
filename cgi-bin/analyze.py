@@ -16,35 +16,19 @@ import urllib.error
 import urllib.parse
 import ssl
 import time
-from html.parser import HTMLParser
 from datetime import datetime, timezone, timedelta
 
-# ============================================
-# CONFIGURATION (from environment variables)
-# ============================================
+# Add cgi-bin to path for module imports
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-def _load_env_file():
-    """Load .env file from project root if it exists."""
-    env_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), ".env")
-    if os.path.exists(env_path):
-        with open(env_path) as f:
-            for line in f:
-                line = line.strip()
-                if line and not line.startswith("#") and "=" in line:
-                    key, _, value = line.partition("=")
-                    os.environ.setdefault(key.strip(), value.strip())
+from config import SUPABASE_URL, SUPABASE_KEY, OPENAI_API_KEY, VALUESERP_API_KEY
+from supabase_client import (supabase_request, supabase_upsert, supabase_insert,
+                              supabase_select, supabase_update)
+from parser import PageParser
+from api_integrations import (get_pagespeed_scores, analyze_content_quality_llm,
+                               generate_serp_test_queries, run_serp_analysis)
 
-_load_env_file()
-
-SUPABASE_URL = os.environ.get("SUPABASE_URL", "")
-SUPABASE_KEY = os.environ.get("SUPABASE_KEY", "")
-OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY", "")
-VALUESERP_API_KEY = os.environ.get("VALUESERP_API_KEY", "")
-
-def supabase_request(path, method="GET", data=None, params=None):
-    """Make a request to Supabase REST API. Returns parsed JSON or None on error."""
-    if not SUPABASE_URL or not SUPABASE_KEY:
-        return None
+# Supabase client, PageParser, and API integrations are imported from modules above.
     url = f"{SUPABASE_URL}/rest/v1/{path}"
     if params:
         url += "?" + urllib.parse.urlencode(params)
