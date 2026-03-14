@@ -354,12 +354,19 @@
         els.errorMessage.textContent = data.message || data.error || 'Something went wrong. Please try again.';
 
         // Handle Rate Limiting UI specifically
-        if (res.status === 429) {
-          els.errorTitle.textContent = "Scan Limit Reached";
-          els.rateLimitTimer.hidden = false;
+        if (res.status === 429 || data.rate_limited) {
+          els.errorTitle.textContent = "You've Used Your Free Scan";
+          els.rateLimitTimer.hidden = true;
           els.errorIcon.style.color = "var(--color-warning)";
           els.tryAgainBtn.style.display = 'none';
-          els.errorMessage.style.maxWidth = "400px";
+          els.errorMessage.style.maxWidth = "480px";
+          els.errorMessage.innerHTML = escapeHtml(data.error || 'Scan limit reached.') +
+            (data.days_remaining ? '<br><span style="font-size:0.9rem;color:var(--color-text-muted);">Your next free scan is available in ' + data.days_remaining + ' day' + (data.days_remaining > 1 ? 's' : '') + '.</span>' : '') +
+            '<br><br>' +
+            '<a href="' + escapeHtml(data.cta_url || 'mailto:hello@alianzaconnects.com?subject=Multi-Scan%20Access%20Inquiry') + '" ' +
+            'style="display:inline-block;padding:12px 28px;background:var(--color-primary);color:#fff;border-radius:var(--radius-md);font-weight:700;font-size:1rem;text-decoration:none;margin-top:4px;">' +
+            'Get Unlimited Scans →</a>' +
+            '<br><span style="font-size:0.8rem;color:var(--color-text-faint);margin-top:8px;display:inline-block;">Multi-Scan &amp; Agency plans available. Contact us to learn more.</span>';
         } else {
           els.errorTitle.textContent = "Analysis Failed";
           els.rateLimitTimer.hidden = true;
@@ -412,12 +419,19 @@
         els.errorMessage.textContent = data.message || data.error || 'Something went wrong. Please try again.';
 
         // Handle Rate Limiting UI specifically
-        if (res.status === 429) {
-          els.errorTitle.textContent = "Scan Limit Reached";
-          els.rateLimitTimer.hidden = false;
+        if (res.status === 429 || data.rate_limited) {
+          els.errorTitle.textContent = "You've Used Your Free Scan";
+          els.rateLimitTimer.hidden = true;
           els.errorIcon.style.color = "var(--color-warning)";
           els.tryAgainBtn.style.display = 'none';
-          els.errorMessage.style.maxWidth = "400px";
+          els.errorMessage.style.maxWidth = "480px";
+          els.errorMessage.innerHTML = escapeHtml(data.error || 'Scan limit reached.') +
+            (data.days_remaining ? '<br><span style="font-size:0.9rem;color:var(--color-text-muted);">Your next free scan is available in ' + data.days_remaining + ' day' + (data.days_remaining > 1 ? 's' : '') + '.</span>' : '') +
+            '<br><br>' +
+            '<a href="' + escapeHtml(data.cta_url || 'mailto:hello@alianzaconnects.com?subject=Multi-Scan%20Access%20Inquiry') + '" ' +
+            'style="display:inline-block;padding:12px 28px;background:var(--color-primary);color:#fff;border-radius:var(--radius-md);font-weight:700;font-size:1rem;text-decoration:none;margin-top:4px;">' +
+            'Get Unlimited Scans →</a>' +
+            '<br><span style="font-size:0.8rem;color:var(--color-text-faint);margin-top:8px;display:inline-block;">Multi-Scan &amp; Agency plans available. Contact us to learn more.</span>';
         } else {
           els.errorTitle.textContent = "Analysis Failed";
           els.rateLimitTimer.hidden = true;

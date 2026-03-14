@@ -1,7 +1,6 @@
 """
-Backend rate limiter using SQLite.
-Tracks requests per IP and enforces configurable limits.
-Import and call check_rate_limit() at the top of your CGI handler.
+Backend rate limiter — 1 free scan per verified email or phone per month.
+Tracks by contact identity (email or phone), not by IP.
 """
 
 import os
@@ -10,34 +9,33 @@ import time
 
 DB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "data.db")
 
-# Defaults: 5 scans per IP per 10-minute window
-MAX_REQUESTS = int(os.environ.get("RATE_LIMIT_MAX", "5"))
-WINDOW_SECONDS = int(os.environ.get("RATE_LIMIT_WINDOW", "600"))
+# 30 days in seconds
+WINDOW_SECONDS = 30 * 24 * 60 * 60
 
 
 def _get_db():
     db = sqlite3.connect(DB_PATH)
     db.execute("""
-        CREATE TABLE IF NOT EXISTS rate_limits (
-            ip TEXT NOT NULL,
-            ts REAL NOT NULL
+        CREATE TABLE IF NOT EXISTS scan_limits (
+            identity TEXT NOT NULL,
+            identity_type TEXT NOT NULL,
+            scanned_at REAL NOT NULL
         )
     """)
-    db.execute("CREATE INDEX IF NOT EXISTS idx_rate_ip_ts ON rate_limits (ip, ts)")
+    db.execute("CREATE INDEX IF NOT EXISTS idx_scan_limits_identity ON scan_limits (identity, scanned_at)")
     db.commit()
     return db
 
 
-def check_rate_limit(ip=None):
+def check_rate_limit(email="", phone=""):
     """
-    Check if the given IP is within rate limits.
-    Returns (allowed: bool, retry_after: int seconds).
+    Check if this email or phone has already used their free scan this month.
+    Returns (allowed: bool, days_remaining: int).
+    Both email and phone are required fields, but we check both —
+    if either has been used in the last 30 days, they're rate-limited.
     """
-    if not ip:
-        ip = os.environ.get("REMOTE_ADDR", "unknown")
-
-    if ip in ("127.0.0.1", "::1", "unknown"):
-        return True, 0
+    if not email and not phone:
+        return True, 0  # No identity to check against
 
     now = time.time()
     cutoff = now - WINDOW_SECONDS
@@ -45,32 +43,33 @@ def check_rate_limit(ip=None):
     try:
         db = _get_db()
 
-        # Clean old entries
-        db.execute("DELETE FROM rate_limits WHERE ts < ?", (cutoff,))
+        # Clean entries older than 30 days
+        db.execute("DELETE FROM scan_limits WHERE scanned_at < ?", (cutoff,))
+        db.commit()
 
-        # Count recent requests
-        row = db.execute(
-            "SELECT COUNT(*) FROM rate_limits WHERE ip = ? AND ts >= ?",
-            (ip, cutoff)
-        ).fetchone()
-        count = row[0] if row else 0
-
-        if count >= MAX_REQUESTS:
-            # Find oldest entry to calculate retry_after
-            oldest = db.execute(
-                "SELECT MIN(ts) FROM rate_limits WHERE ip = ? AND ts >= ?",
-                (ip, cutoff)
+        # Check if either email or phone was used recently
+        for identity, id_type in [(email.lower(), "email"), (phone, "phone")]:
+            if not identity:
+                continue
+            row = db.execute(
+                "SELECT scanned_at FROM scan_limits WHERE identity = ? AND scanned_at >= ? ORDER BY scanned_at DESC LIMIT 1",
+                (identity, cutoff)
             ).fetchone()
-            retry_after = int((oldest[0] + WINDOW_SECONDS) - now) + 1 if oldest and oldest[0] else WINDOW_SECONDS
-            db.close()
-            return False, max(1, retry_after)
+            if row:
+                days_remaining = max(1, int((row[0] + WINDOW_SECONDS - now) / 86400) + 1)
+                db.close()
+                return False, days_remaining
 
-        # Record this request
-        db.execute("INSERT INTO rate_limits (ip, ts) VALUES (?, ?)", (ip, now))
+        # Record this scan for both email and phone
+        for identity, id_type in [(email.lower(), "email"), (phone, "phone")]:
+            if identity:
+                db.execute(
+                    "INSERT INTO scan_limits (identity, identity_type, scanned_at) VALUES (?, ?, ?)",
+                    (identity, id_type, now)
+                )
         db.commit()
         db.close()
         return True, 0
 
     except Exception:
-        # If rate limiting fails, allow the request
         return True, 0

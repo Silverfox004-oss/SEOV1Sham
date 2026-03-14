@@ -2475,20 +2475,6 @@ def main():
         return
 
     elif method == "POST":
-        # Rate limit check
-        try:
-            from rate_limiter import check_rate_limit
-            client_ip = os.environ.get("REMOTE_ADDR", "unknown")
-            allowed, retry_after = check_rate_limit(client_ip)
-            if not allowed:
-                print("Status: 429")
-                print("Content-Type: application/json")
-                print()
-                print(json.dumps({"error": f"Rate limit exceeded. Please try again in {retry_after} seconds.", "retry_after": retry_after}))
-                return
-        except ImportError:
-            pass  # rate_limiter not available, skip
-
         # Run analysis
         try:
             content_length = int(os.environ.get("CONTENT_LENGTH", 0))
@@ -2564,6 +2550,25 @@ def main():
         # Basic email format check if provided
         if contact_email and not re.match(r'^[^@\s]+@[^@\s]+\.[^@\s]+$', contact_email):
             contact_email = ""
+
+        # ---- Rate limit: 1 free scan per email/phone per month ----
+        try:
+            from rate_limiter import check_rate_limit
+            allowed, days_remaining = check_rate_limit(email=contact_email, phone=contact_phone)
+            if not allowed:
+                print("Status: 429")
+                print("Content-Type: application/json")
+                print()
+                print(json.dumps({
+                    "error": "You've already used your free scan this month.",
+                    "rate_limited": True,
+                    "days_remaining": days_remaining,
+                    "cta_message": "Need more scans? Our Multi-Scan and Agency plans give you unlimited access.",
+                    "cta_url": "mailto:hello@alianzaconnects.com?subject=Multi-Scan%20Access%20Inquiry"
+                }))
+                return
+        except ImportError:
+            pass
 
         # ---- Cache check: return recent scan if URL was analyzed within 24h ----
         if not competitor_url:
