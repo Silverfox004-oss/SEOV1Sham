@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard — Alianza Connects</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./base.css">
+  <link rel="stylesheet" href="./style.css">
+  <style>
+    /* Admin-specific styles */
+    .admin-layout { max-width: 1200px; margin: 0 auto; padding: var(--space-8) var(--space-4); }
+    .admin-title { font-size: var(--text-xl); font-weight: 800; color: var(--color-text); margin-bottom: var(--space-2); }
+    .admin-subtitle { font-size: var(--text-sm); color: var(--color-text-muted); margin-bottom: var(--space-6); }
+
+    /* Stats Row */
+    .admin-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: var(--space-4); margin-bottom: var(--space-6); }
+    .stat-card { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: var(--space-5); }
+    .stat-value { font-size: var(--text-xl); font-weight: 800; color: var(--color-text); }
+    .stat-label { font-size: var(--text-xs); color: var(--color-text-muted); font-weight: 500; margin-top: var(--space-1); }
+
+    /* Filters */
+    .admin-filters { display: flex; gap: var(--space-3); flex-wrap: wrap; margin-bottom: var(--space-4); align-items: center; }
+    .filter-select, .filter-input {
+      font-size: var(--text-sm); padding: var(--space-2) var(--space-3);
+      border: 1px solid var(--color-border); border-radius: var(--radius-md);
+      background: var(--color-surface); color: var(--color-text);
+    }
+    .filter-input { min-width: 220px; }
+    .btn-export {
+      margin-left: auto; font-size: var(--text-sm); font-weight: 600;
+      padding: var(--space-2) var(--space-4); border-radius: var(--radius-md);
+      background: var(--color-primary); color: #fff; border: none; cursor: pointer;
+    }
+    .btn-export:hover { background: var(--color-primary-hover); }
+
+    /* Table */
+    .admin-table-wrap { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-lg); overflow-x: auto; }
+    .admin-table { width: 100%; border-collapse: collapse; font-size: var(--text-sm); }
+    .admin-table th {
+      text-align: left; padding: var(--space-3) var(--space-4); font-weight: 600;
+      color: var(--color-text-muted); border-bottom: 1px solid var(--color-border);
+      font-size: var(--text-xs); text-transform: uppercase; letter-spacing: 0.05em;
+      cursor: pointer; user-select: none; white-space: nowrap;
+    }
+    .admin-table th:hover { color: var(--color-text); }
+    .admin-table th .sort-arrow { margin-left: 4px; opacity: 0.4; }
+    .admin-table th.sorted .sort-arrow { opacity: 1; }
+    .admin-table td { padding: var(--space-3) var(--space-4); border-bottom: 1px solid var(--color-divider); color: var(--color-text); vertical-align: middle; }
+    .admin-table tr:last-child td { border-bottom: none; }
+    .admin-table tr:hover td { background: var(--color-surface-2); }
+
+    /* Status badges */
+    .status-badge {
+      display: inline-block; font-size: 0.7rem; font-weight: 600; padding: 2px 8px;
+      border-radius: var(--radius-full); text-transform: uppercase; letter-spacing: 0.04em;
+    }
+    .status-new { background: var(--color-primary-highlight); color: var(--color-primary); }
+    .status-contacted { background: #DBEAFE; color: #1E40AF; }
+    .status-pitched { background: var(--color-warning-highlight); color: #B45309; }
+    .status-negotiating { background: #FEF3C7; color: #92400E; }
+    .status-closed_won { background: var(--color-success-highlight); color: #065F46; }
+    .status-closed_lost { background: var(--color-error-highlight); color: #991B1B; }
+
+    /* Score pill */
+    .score-pill { font-weight: 700; font-size: var(--text-sm); }
+    .score-high { color: var(--color-success); }
+    .score-mid { color: var(--color-warning); }
+    .score-low { color: var(--color-error); }
+
+    /* Status select dropdown */
+    .status-select {
+      font-size: 0.75rem; padding: 2px 6px; border: 1px solid var(--color-border);
+      border-radius: var(--radius-sm); background: var(--color-surface);
+      color: var(--color-text); cursor: pointer;
+    }
+
+    /* Lead detail panel */
+    .lead-detail { display: none; background: var(--color-surface-2); border-radius: var(--radius-lg); padding: var(--space-5); margin: var(--space-4) 0; }
+    .lead-detail.active { display: block; }
+    .lead-detail h3 { font-size: var(--text-lg); font-weight: 700; margin-bottom: var(--space-3); }
+    .lead-detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-4); }
+    .lead-detail-item { }
+    .lead-detail-label { font-size: var(--text-xs); color: var(--color-text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; }
+    .lead-detail-value { font-size: var(--text-sm); color: var(--color-text); margin-top: 2px; }
+    .notes-textarea {
+      width: 100%; min-height: 80px; margin-top: var(--space-2); padding: var(--space-3);
+      border: 1px solid var(--color-border); border-radius: var(--radius-md);
+      font-family: var(--font-body); font-size: var(--text-sm); resize: vertical;
+      background: var(--color-surface); color: var(--color-text);
+    }
+    .btn-save-notes {
+      margin-top: var(--space-2); font-size: var(--text-sm); font-weight: 600;
+      padding: var(--space-2) var(--space-4); border-radius: var(--radius-md);
+      background: var(--color-success); color: #fff; border: none; cursor: pointer;
+    }
+
+    /* Outreach section */
+    .outreach-section { margin-top: var(--space-4); }
+    .outreach-block { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: var(--space-4); margin-top: var(--space-2); }
+    .outreach-subject { font-weight: 700; margin-bottom: var(--space-2); }
+    .outreach-body { white-space: pre-wrap; font-size: var(--text-sm); color: var(--color-text-muted); line-height: 1.6; }
+    .btn-copy-email {
+      margin-top: var(--space-2); font-size: var(--text-xs); font-weight: 600;
+      padding: var(--space-1) var(--space-3); border-radius: var(--radius-sm);
+      background: var(--color-surface-2); border: 1px solid var(--color-border);
+      cursor: pointer; color: var(--color-text);
+    }
+
+    /* Loading / empty */
+    .admin-loading, .admin-empty { text-align: center; padding: var(--space-12); color: var(--color-text-muted); }
+    .admin-empty { font-size: var(--text-sm); }
+
+    /* Pagination */
+    .admin-pagination { display: flex; justify-content: center; gap: var(--space-2); margin-top: var(--space-4); }
+    .page-btn {
+      padding: var(--space-2) var(--space-3); border: 1px solid var(--color-border);
+      border-radius: var(--radius-md); background: var(--color-surface);
+      font-size: var(--text-sm); cursor: pointer; color: var(--color-text);
+    }
+    .page-btn.active { background: var(--color-primary); color: #fff; border-color: var(--color-primary); }
+    .page-btn:hover:not(.active) { background: var(--color-surface-2); }
+
+    @media (max-width: 768px) {
+      .admin-filters { flex-direction: column; }
+      .filter-input { min-width: 100%; }
+      .btn-export { margin-left: 0; width: 100%; }
+      .lead-detail-grid { grid-template-columns: 1fr; }
+      .admin-table { font-size: var(--text-xs); }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <header class="site-header">
+    <div class="header-inner">
+      <a href="./" class="logo">ALIANZA<span class="logo-dot"></span></a>
+      <div class="header-meta">
+        <a href="./" class="admin-link">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+          Scanner
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <div class="admin-layout">
+    <h1 class="admin-title">Lead Dashboard</h1>
+    <p class="admin-subtitle">Manage leads captured from the Search Readiness Scanner.</p>
+
+    <!-- Stats -->
+    <div class="admin-stats" id="adminStats">
+      <div class="stat-card"><div class="stat-value" id="statTotal">—</div><div class="stat-label">Total Leads</div></div>
+      <div class="stat-card"><div class="stat-value" id="statNew">—</div><div class="stat-label">New</div></div>
+      <div class="stat-card"><div class="stat-value" id="statContacted">—</div><div class="stat-label">Contacted</div></div>
+      <div class="stat-card"><div class="stat-value" id="statAvgScore">—</div><div class="stat-label">Avg Score</div></div>
+      <div class="stat-card"><div class="stat-value" id="statScansToday">—</div><div class="stat-label">Scans Today</div></div>
+    </div>
+
+    <!-- Filters -->
+    <div class="admin-filters">
+      <select class="filter-select" id="filterStatus">
+        <option value="">All Statuses</option>
+        <option value="new">New</option>
+        <option value="contacted">Contacted</option>
+        <option value="pitched">Pitched</option>
+        <option value="negotiating">Negotiating</option>
+        <option value="closed_won">Closed Won</option>
+        <option value="closed_lost">Closed Lost</option>
+      </select>
+      <select class="filter-select" id="filterIndustry">
+        <option value="">All Industries</option>
+      </select>
+      <select class="filter-select" id="filterSort">
+        <option value="last_seen.desc">Most Recent</option>
+        <option value="latest_overall_score.desc">Highest Score</option>
+        <option value="latest_overall_score.asc">Lowest Score</option>
+        <option value="scan_count.desc">Most Scans</option>
+      </select>
+      <input type="text" class="filter-input" id="filterSearch" placeholder="Search by domain or business name...">
+      <button class="btn-export" id="exportBtn">Export CSV</button>
+    </div>
+
+    <!-- Table -->
+    <div class="admin-table-wrap">
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th>Business</th>
+            <th>Domain</th>
+            <th>Score</th>
+            <th>Industry</th>
+            <th>Status</th>
+            <th>Scans</th>
+            <th>Contact</th>
+            <th>Last Seen</th>
+          </tr>
+        </thead>
+        <tbody id="leadsTableBody">
+          <tr><td colspan="8" class="admin-loading">Loading leads...</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Pagination -->
+    <div class="admin-pagination" id="pagination"></div>
+
+    <!-- Lead Detail Panel (shown when clicking a row) -->
+    <div class="lead-detail" id="leadDetail"></div>
+  </div>
+
+  <footer class="site-footer">
+    Powered by <a href="https://alianzaconnects.com" target="_blank" rel="noopener noreferrer">Alianza Connects</a>
+  </footer>
+
+  <script>
+  (function() {
+    'use strict';
+
+    // --- Config: reads from the same env as the scanner ---
+    // For the admin dashboard, we need the Supabase URL and key.
+    // In production, these should come from a config endpoint or be injected at build time.
+    // For now, we fetch them from a small config endpoint.
+    let SUPABASE_URL = '';
+    let SUPABASE_KEY = '';
+
+    const PAGE_SIZE = 25;
+    let currentPage = 0;
+    let totalLeads = 0;
+    let allLeads = [];
+
+    // --- Init: Try to load config from a CGI endpoint, fallback to prompt ---
+    async function init() {
+      // Try loading config from admin config endpoint
+      try {
+        const resp = await fetch('/cgi-bin/admin_config.py');
+        if (resp.ok) {
+          const cfg = await resp.json();
+          SUPABASE_URL = cfg.supabase_url || '';
+          SUPABASE_KEY = cfg.supabase_key || '';
+        }
+      } catch (e) {
+        // Config endpoint not available
+      }
+
+      if (!SUPABASE_URL || !SUPABASE_KEY) {
+        document.getElementById('leadsTableBody').innerHTML =
+          '<tr><td colspan="8" class="admin-empty">Supabase not configured. Set up /cgi-bin/admin_config.py or configure environment variables.</td></tr>';
+        return;
+      }
+
+      loadLeads();
+      loadIndustries();
+      setupFilters();
+    }
+
+    // --- Supabase helper ---
+    async function sbFetch(path, options = {}) {
+      const url = `${SUPABASE_URL}/rest/v1/${path}`;
+      const headers = {
+        'apikey': SUPABASE_KEY,
+        'Authorization': `Bearer ${SUPABASE_KEY}`,
+        'Content-Type': 'application/json',
+        ...options.headers
+      };
+      const resp = await fetch(url, { ...options, headers });
+      if (options.method === 'PATCH') return resp;
+      return resp.json();
+    }
+
+    // --- Load leads ---
+    async function loadLeads() {
+      const status = document.getElementById('filterStatus').value;
+      const industry = document.getElementById('filterIndustry').value;
+      const search = document.getElementById('filterSearch').value.trim().toLowerCase();
+      const sort = document.getElementById('filterSort').value;
+      const [sortCol, sortDir] = sort.split('.');
+
+      let query = `leads?select=*&order=${sortCol}.${sortDir}&offset=${currentPage * PAGE_SIZE}&limit=${PAGE_SIZE}`;
+
+      if (status) query += `&status=eq.${status}`;
+      if (industry) query += `&industry=eq.${industry}`;
+      if (search) query += `&or=(domain.ilike.*${encodeURIComponent(search)}*,business_name.ilike.*${encodeURIComponent(search)}*)`;
+
+      try {
+        // Get count
+        const countHeaders = { 'Prefer': 'count=exact', 'Range': '0-0' };
+        const countResp = await fetch(`${SUPABASE_URL}/rest/v1/leads?select=id`, {
+          headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}`, ...countHeaders }
+        });
+        const rangeHeader = countResp.headers.get('content-range');
+        totalLeads = rangeHeader ? parseInt(rangeHeader.split('/')[1]) || 0 : 0;
+
+        const leads = await sbFetch(query);
+        allLeads = leads;
+        renderTable(leads);
+        renderPagination();
+        updateStats(leads);
+      } catch (e) {
+        document.getElementById('leadsTableBody').innerHTML =
+          `<tr><td colspan="8" class="admin-empty">Error loading leads: ${escapeHtml(e.message)}</td></tr>`;
+      }
+    }
+
+    // --- Load industries for filter ---
+    async function loadIndustries() {
+      try {
+        const leads = await sbFetch('leads?select=industry&order=industry.asc');
+        const industries = [...new Set(leads.map(l => l.industry).filter(i => i && i !== 'unknown'))];
+        const select = document.getElementById('filterIndustry');
+        industries.forEach(ind => {
+          const opt = document.createElement('option');
+          opt.value = ind;
+          opt.textContent = ind.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+          select.appendChild(opt);
+        });
+      } catch (e) { /* ignore */ }
+    }
+
+    // --- Update stats ---
+    async function updateStats(currentLeads) {
+      try {
+        const all = await sbFetch('leads?select=id,status,latest_overall_score');
+        document.getElementById('statTotal').textContent = all.length;
+        document.getElementById('statNew').textContent = all.filter(l => l.status === 'new').length;
+        document.getElementById('statContacted').textContent = all.filter(l => l.status === 'contacted').length;
+
+        const scores = all.map(l => l.latest_overall_score).filter(s => s > 0);
+        const avg = scores.length ? Math.round(scores.reduce((a, b) => a + b, 0) / scores.length) : 0;
+        document.getElementById('statAvgScore').textContent = avg;
+
+        // Scans today
+        const today = new Date().toISOString().slice(0, 10);
+        const scansToday = await sbFetch(`scans?select=id&scanned_at=gte.${today}T00:00:00`);
+        document.getElementById('statScansToday').textContent = Array.isArray(scansToday) ? scansToday.length : 0;
+      } catch (e) { /* ignore */ }
+    }
+
+    // --- Render table ---
+    function renderTable(leads) {
+      const tbody = document.getElementById('leadsTableBody');
+      if (!leads || leads.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="8" class="admin-empty">No leads found.</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = leads.map(lead => {
+        const score = lead.latest_overall_score || 0;
+        const scoreClass = score >= 70 ? 'score-high' : score >= 40 ? 'score-mid' : 'score-low';
+        const lastSeen = lead.last_seen ? new Date(lead.last_seen).toLocaleDateString() : '—';
+        const contact = lead.contact_name || lead.contact_email || '—';
+
+        return `<tr class="lead-row" data-id="${lead.id}" data-domain="${escapeHtml(lead.domain)}">
+          <td><strong>${escapeHtml(lead.business_name || lead.domain)}</strong></td>
+          <td>${escapeHtml(lead.domain)}</td>
+          <td><span class="score-pill ${scoreClass}">${score}</span></td>
+          <td>${escapeHtml((lead.industry || 'unknown').replace(/_/g, ' '))}</td>
+          <td>
+            <select class="status-select" data-domain="${escapeHtml(lead.domain)}" onchange="window._updateStatus(this)">
+              ${['new','contacted','pitched','negotiating','closed_won','closed_lost'].map(s =>
+                `<option value="${s}" ${lead.status === s ? 'selected' : ''}>${s.replace(/_/g, ' ')}</option>`
+              ).join('')}
+            </select>
+          </td>
+          <td>${lead.scan_count || 1}</td>
+          <td>${escapeHtml(contact)}</td>
+          <td>${lastSeen}</td>
+        </tr>`;
+      }).join('');
+
+      // Click to expand
+      tbody.querySelectorAll('.lead-row').forEach(row => {
+        row.addEventListener('click', (e) => {
+          if (e.target.tagName === 'SELECT' || e.target.tagName === 'OPTION') return;
+          const domain = row.dataset.domain;
+          const lead = leads.find(l => l.domain === domain);
+          if (lead) showLeadDetail(lead);
+        });
+      });
+    }
+
+    // --- Show lead detail panel ---
+    function showLeadDetail(lead) {
+      const panel = document.getElementById('leadDetail');
+      const outreachSelf = lead.outreach_self ? JSON.parse(lead.outreach_self) : null;
+      const outreachComp = lead.outreach_competitor ? JSON.parse(lead.outreach_competitor) : null;
+
+      panel.innerHTML = `
+        <h3>${escapeHtml(lead.business_name || lead.domain)}</h3>
+        <div class="lead-detail-grid">
+          <div class="lead-detail-item">
+            <div class="lead-detail-label">Domain</div>
+            <div class="lead-detail-value">${escapeHtml(lead.domain)}</div>
+          </div>
+          <div class="lead-detail-item">
+            <div class="lead-detail-label">Industry</div>
+            <div class="lead-detail-value">${escapeHtml((lead.industry || 'unknown').replace(/_/g, ' '))}</div>
+          </div>
+          <div class="lead-detail-item">
+            <div class="lead-detail-label">Contact Name</div>
+            <div class="lead-detail-value">${escapeHtml(lead.contact_name || '—')}</div>
+          </div>
+          <div class="lead-detail-item">
+            <div class="lead-detail-label">Email</div>
+            <div class="lead-detail-value">${escapeHtml(lead.contact_email || '—')}</div>
+          </div>
+          <div class="lead-detail-item">
+            <div class="lead-detail-label">Phone</div>
+            <div class="lead-detail-value">${escapeHtml(lead.contact_phone || '—')}</div>
+          </div>
+          <div class="lead-detail-item">
+            <div class="lead-detail-label">Role</div>
+            <div class="lead-detail-value">${escapeHtml(lead.contact_role || '—')}</div>
+          </div>
+          <div class="lead-detail-item">
+            <div class="lead-detail-label">Scores</div>
+            <div class="lead-detail-value">
+              SEO: ${lead.latest_seo_score} | AI: ${lead.latest_ai_score} | Voice: ${lead.latest_voice_score} | Local: ${lead.latest_local_score}
+            </div>
+          </div>
+          <div class="lead-detail-item">
+            <div class="lead-detail-label">Source</div>
+            <div class="lead-detail-value">${escapeHtml(lead.source || 'scanner')}${lead.scanned_by_domain ? ' (scanned by ' + escapeHtml(lead.scanned_by_domain) + ')' : ''}</div>
+          </div>
+        </div>
+
+        <div style="margin-top: var(--space-4);">
+          <div class="lead-detail-label">Notes</div>
+          <textarea class="notes-textarea" id="notesInput">${escapeHtml(lead.notes || '')}</textarea>
+          <button class="btn-save-notes" onclick="window._saveNotes('${escapeHtml(lead.domain)}')">Save Notes</button>
+        </div>
+
+        ${outreachSelf ? `
+        <div class="outreach-section">
+          <div class="lead-detail-label">Outreach Email (Self-Scan)</div>
+          <div class="outreach-block">
+            <div class="outreach-subject">Subject: ${escapeHtml(outreachSelf.subject)}</div>
+            <div class="outreach-body">${escapeHtml(outreachSelf.body)}</div>
+            <button class="btn-copy-email" onclick="window._copyEmail(this, 'self')">Copy Email</button>
+          </div>
+        </div>` : ''}
+
+        ${outreachComp ? `
+        <div class="outreach-section">
+          <div class="lead-detail-label">Outreach Email (Competitor Alert)</div>
+          <div class="outreach-block">
+            <div class="outreach-subject">Subject: ${escapeHtml(outreachComp.subject)}</div>
+            <div class="outreach-body">${escapeHtml(outreachComp.body)}</div>
+            <button class="btn-copy-email" onclick="window._copyEmail(this, 'competitor')">Copy Email</button>
+          </div>
+        </div>` : ''}
+      `;
+
+      panel.classList.add('active');
+      panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    // --- Pagination ---
+    function renderPagination() {
+      const container = document.getElementById('pagination');
+      const totalPages = Math.ceil(totalLeads / PAGE_SIZE);
+      if (totalPages <= 1) { container.innerHTML = ''; return; }
+
+      let html = '';
+      for (let i = 0; i < totalPages; i++) {
+        html += `<button class="page-btn ${i === currentPage ? 'active' : ''}" onclick="window._goToPage(${i})">${i + 1}</button>`;
+      }
+      container.innerHTML = html;
+    }
+
+    // --- Filters ---
+    function setupFilters() {
+      ['filterStatus', 'filterIndustry', 'filterSort'].forEach(id => {
+        document.getElementById(id).addEventListener('change', () => { currentPage = 0; loadLeads(); });
+      });
+
+      let searchTimeout;
+      document.getElementById('filterSearch').addEventListener('input', () => {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(() => { currentPage = 0; loadLeads(); }, 300);
+      });
+
+      document.getElementById('exportBtn').addEventListener('click', exportCSV);
+    }
+
+    // --- Update lead status ---
+    window._updateStatus = async function(select) {
+      const domain = select.dataset.domain;
+      const newStatus = select.value;
+      try {
+        await sbFetch(`leads?domain=eq.${encodeURIComponent(domain)}`, {
+          method: 'PATCH',
+          headers: { 'Prefer': 'return=minimal' },
+          body: JSON.stringify({ status: newStatus })
+        });
+      } catch (e) {
+        alert('Failed to update status: ' + e.message);
+      }
+    };
+
+    // --- Save notes ---
+    window._saveNotes = async function(domain) {
+      const notes = document.getElementById('notesInput').value;
+      try {
+        await sbFetch(`leads?domain=eq.${encodeURIComponent(domain)}`, {
+          method: 'PATCH',
+          headers: { 'Prefer': 'return=minimal' },
+          body: JSON.stringify({ notes })
+        });
+        const btn = document.querySelector('.btn-save-notes');
+        btn.textContent = 'Saved!';
+        setTimeout(() => btn.textContent = 'Save Notes', 2000);
+      } catch (e) {
+        alert('Failed to save notes: ' + e.message);
+      }
+    };
+
+    // --- Copy email ---
+    window._copyEmail = function(btn, type) {
+      const block = btn.closest('.outreach-block');
+      const subject = block.querySelector('.outreach-subject').textContent.replace('Subject: ', '');
+      const body = block.querySelector('.outreach-body').textContent;
+      navigator.clipboard.writeText(`Subject: ${subject}\n\n${body}`);
+      btn.textContent = 'Copied!';
+      setTimeout(() => btn.textContent = 'Copy Email', 2000);
+    };
+
+    // --- Pagination ---
+    window._goToPage = function(page) {
+      currentPage = page;
+      loadLeads();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
+    // --- Export CSV ---
+    function exportCSV() {
+      if (!allLeads.length) return;
+      const headers = ['domain','business_name','industry','status','latest_overall_score','latest_seo_score','latest_ai_score','latest_voice_score','latest_local_score','contact_name','contact_email','contact_phone','contact_role','scan_count','first_seen','last_seen'];
+      const rows = allLeads.map(l => headers.map(h => `"${String(l[h] || '').replace(/"/g, '""')}"`).join(','));
+      const csv = [headers.join(','), ...rows].join('\n');
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `alianza-leads-${new Date().toISOString().slice(0,10)}.csv`;
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    // --- Escape HTML ---
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    // --- Boot ---
+    init();
+  })();
+  </script>
+</body>
+</html>
