@@ -20,10 +20,23 @@ import ssl
 from datetime import datetime, timezone
 
 # ============================================
-# SUPABASE CONFIG  (mirrored from analyze.py)
+# CONFIGURATION (from environment variables)
 # ============================================
 
-SUPABASE_URL = os.environ.get("SUPABASE_URL", "https://jcwvrrazmceccbzaythk.supabase.co")
+def _load_env_file():
+    """Load .env file from project root if it exists."""
+    env_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), ".env")
+    if os.path.exists(env_path):
+        with open(env_path) as f:
+            for line in f:
+                line = line.strip()
+                if line and not line.startswith("#") and "=" in line:
+                    key, _, value = line.partition("=")
+                    os.environ.setdefault(key.strip(), value.strip())
+
+_load_env_file()
+
+SUPABASE_URL = os.environ.get("SUPABASE_URL", "")
 SUPABASE_KEY = os.environ.get("SUPABASE_KEY", "")
 
 DB_PATH = "data.db"
@@ -974,6 +987,17 @@ def main():
 
     report_id = params.get("id", [None])[0]
     competitor_id = params.get("competitor_id", [None])[0]
+
+    # Validate ID formats (UUIDs only)
+    _uuid_re = r'^[a-f0-9\-]{36}$'
+    if report_id and not re.match(_uuid_re, report_id):
+        print("Status: 400")
+        print("Content-Type: text/html; charset=utf-8")
+        print()
+        print("<html><body><p>Invalid report ID format.</p></body></html>")
+        return
+    if competitor_id and not re.match(_uuid_re, competitor_id):
+        competitor_id = None
 
     if not report_id:
         print("Status: 400")

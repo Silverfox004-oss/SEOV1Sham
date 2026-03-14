@@ -15,33 +15,36 @@ import urllib.request
 import urllib.error
 import urllib.parse
 import ssl
-import json
-import os
-import re
-import sqlite3
-import sys
-import uuid
-import urllib.request
-import urllib.error
-import urllib.parse
-import ssl
 import time
 from html.parser import HTMLParser
 from datetime import datetime, timezone, timedelta
 
 # ============================================
-# SUPABASE CONFIG
+# CONFIGURATION (from environment variables)
 # ============================================
 
-SUPABASE_URL = os.environ.get("SUPABASE_URL", "https://jcwvrrazmceccbzaythk.supabase.co")
-SUPABASE_KEY = os.environ.get("SUPABASE_KEY", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Impjd3ZycmF6bWNlY2NiemF5dGhrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI0ODUyMDksImV4cCI6MjA4ODA2MTIwOX0.-rSx5NwfwPmZHhSDLcMxntLBPRFdio8txKFWXIw16_g")
+def _load_env_file():
+    """Load .env file from project root if it exists."""
+    env_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), ".env")
+    if os.path.exists(env_path):
+        with open(env_path) as f:
+            for line in f:
+                line = line.strip()
+                if line and not line.startswith("#") and "=" in line:
+                    key, _, value = line.partition("=")
+                    os.environ.setdefault(key.strip(), value.strip())
 
-# Other API Keys
+_load_env_file()
+
+SUPABASE_URL = os.environ.get("SUPABASE_URL", "")
+SUPABASE_KEY = os.environ.get("SUPABASE_KEY", "")
 OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY", "")
 VALUESERP_API_KEY = os.environ.get("VALUESERP_API_KEY", "")
 
 def supabase_request(path, method="GET", data=None, params=None):
     """Make a request to Supabase REST API. Returns parsed JSON or None on error."""
+    if not SUPABASE_URL or not SUPABASE_KEY:
+        return None
     url = f"{SUPABASE_URL}/rest/v1/{path}"
     if params:
         url += "?" + urllib.parse.urlencode(params)
@@ -67,6 +70,8 @@ def supabase_request(path, method="GET", data=None, params=None):
 
 def supabase_upsert(table, data, on_conflict=""):
     """Upsert a row into Supabase."""
+    if not SUPABASE_URL or not SUPABASE_KEY:
+        return None
     url = f"{SUPABASE_URL}/rest/v1/{table}"
     headers = {
         "apikey": SUPABASE_KEY,
@@ -91,6 +96,8 @@ def supabase_upsert(table, data, on_conflict=""):
 
 def supabase_insert(table, data):
     """Insert a row into Supabase."""
+    if not SUPABASE_URL or not SUPABASE_KEY:
+        return None
     url = f"{SUPABASE_URL}/rest/v1/{table}"
     headers = {
         "apikey": SUPABASE_KEY,
@@ -112,6 +119,8 @@ def supabase_insert(table, data):
 
 def supabase_select(table, params):
     """Select rows from Supabase."""
+    if not SUPABASE_URL or not SUPABASE_KEY:
+        return []
     url = f"{SUPABASE_URL}/rest/v1/{table}?{urllib.parse.urlencode(params)}"
     headers = {
         "apikey": SUPABASE_KEY,
@@ -129,6 +138,8 @@ def supabase_select(table, params):
 
 def supabase_update(table, data, match_col, match_val):
     """Update rows in Supabase matching a condition."""
+    if not SUPABASE_URL or not SUPABASE_KEY:
+        return None
     url = f"{SUPABASE_URL}/rest/v1/{table}?{match_col}=eq.{urllib.parse.quote(str(match_val))}"
     headers = {
         "apikey": SUPABASE_KEY,
@@ -2432,6 +2443,14 @@ def main():
         params = urllib.parse.parse_qs(query_string)
         report_id = params.get("id", [None])[0]
 
+        # Validate report_id format (UUID)
+        if report_id and not re.match(r'^[a-f0-9\-]{36}$', report_id):
+            print("Status: 400")
+            print("Content-Type: application/json")
+            print()
+            print(json.dumps({"error": "Invalid report ID format."}))
+            return
+
         if not report_id:
             print("Status: 400")
             print("Content-Type: application/json")
@@ -2490,17 +2509,49 @@ def main():
             print(json.dumps({"error": "That doesn't look like a valid website URL. Please include the full address (e.g., https://example.com)."}))
             return
 
+        # SSRF protection — block internal/private network URLs
+        hostname = parsed.netloc.split(":")[0].lower()
+        _blocked = ("localhost", "127.0.0.1", "0.0.0.0", "::1", "metadata.google",
+                     "169.254.169.254", "10.", "192.168.", "172.16.", "172.17.",
+                     "172.18.", "172.19.", "172.20.", "172.21.", "172.22.", "172.23.",
+                     "172.24.", "172.25.", "172.26.", "172.27.", "172.28.", "172.29.",
+                     "172.30.", "172.31.")
+        if any(hostname == b or hostname.startswith(b) for b in _blocked):
+            print("Status: 400")
+            print("Content-Type: application/json")
+            print()
+            print(json.dumps({"error": "Internal or private network URLs cannot be scanned."}))
+            return
+
         competitor_url = payload.get("competitor_url", "").strip()
         if competitor_url:
             # Normalise competitor URL
             if not competitor_url.startswith("http://") and not competitor_url.startswith("https://"):
                 competitor_url = "https://" + competitor_url
+            # SSRF check for competitor URL too
+            c_host = urllib.parse.urlparse(competitor_url).netloc.split(":")[0].lower()
+            if any(c_host == b or c_host.startswith(b) for b in _blocked):
+                print("Status: 400")
+                print("Content-Type: application/json")
+                print()
+                print(json.dumps({"error": "Internal or private network URLs cannot be scanned."}))
+                return
 
-        # Extract contact / lead info from form gate
-        contact_name  = payload.get("contact_name",  "").strip()
-        contact_email = payload.get("contact_email", "").strip()
-        contact_phone = payload.get("contact_phone", "").strip()
-        contact_role  = payload.get("contact_role",  "").strip()
+        # Extract and sanitize contact / lead info from form gate
+        def _sanitize(val, max_len=200):
+            """Strip control characters and cap length."""
+            if not isinstance(val, str):
+                return ""
+            return re.sub(r'[\x00-\x1f\x7f]', '', val.strip())[:max_len]
+
+        contact_name  = _sanitize(payload.get("contact_name",  ""), 100)
+        contact_email = _sanitize(payload.get("contact_email", ""), 254)
+        contact_phone = _sanitize(payload.get("contact_phone", ""), 30)
+        contact_role  = _sanitize(payload.get("contact_role",  ""), 100)
+
+        # Basic email format check if provided
+        if contact_email and not re.match(r'^[^@\s]+@[^@\s]+\.[^@\s]+$', contact_email):
+            contact_email = ""
 
         try:
             if competitor_url:
