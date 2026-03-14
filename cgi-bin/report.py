@@ -107,7 +107,8 @@ def track_pdf_download(report_id, competitor_id=None):
 
 
 def fetch_report(report_id):
-    """Load a report JSON from SQLite. Returns dict or None."""
+    """Load a report JSON. Tries SQLite first, then Supabase."""
+    # Try SQLite local cache first
     try:
         db = get_db()
         row = db.execute(
@@ -118,6 +119,36 @@ def fetch_report(report_id):
             return json.loads(row[0])
     except Exception:
         pass
+
+    # Fallback to Supabase
+    if SUPABASE_URL and SUPABASE_KEY:
+        try:
+            sb_url = f"{SUPABASE_URL}/rest/v1/scans?select=full_report&report_id=eq.{urllib.parse.quote(report_id)}&limit=1"
+            sb_headers = {
+                "apikey": SUPABASE_KEY,
+                "Authorization": f"Bearer {SUPABASE_KEY}",
+            }
+            req = urllib.request.Request(sb_url, headers=sb_headers, method="GET")
+            ctx = ssl.create_default_context()
+            resp = urllib.request.urlopen(req, timeout=8, context=ctx)
+            rows = json.loads(resp.read().decode("utf-8"))
+            if rows and rows[0].get("full_report"):
+                report_data = rows[0]["full_report"]
+                # Cache locally for next time
+                try:
+                    db = get_db()
+                    db.execute(
+                        "INSERT OR REPLACE INTO reports (report_id, url, data) VALUES (?, ?, ?)",
+                        (report_id, report_data.get("url", ""), json.dumps(report_data))
+                    )
+                    db.commit()
+                    db.close()
+                except Exception:
+                    pass
+                return report_data
+        except Exception:
+            pass
+
     return None
 
 
