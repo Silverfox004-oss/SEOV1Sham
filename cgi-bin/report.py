@@ -1020,7 +1020,7 @@ def main():
     competitor_id = params.get("competitor_id", [None])[0]
 
     # Validate ID formats (UUIDs only)
-    _uuid_re = r'^[a-f0-9\-]{36}$'
+    _uuid_re = r'^[a-f0-9\-]{8,36}$'
     if report_id and not re.match(_uuid_re, report_id):
         print("Status: 400")
         print("Content-Type: text/html; charset=utf-8")

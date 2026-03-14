@@ -2379,6 +2379,20 @@ def run_analysis(url, scan_type="self", primary_domain=None, competitor_domain=N
         }
     }
 
+    # Save to local SQLite for PDF generation
+    try:
+        db_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "data.db")
+        db = sqlite3.connect(db_path)
+        db.execute("""CREATE TABLE IF NOT EXISTS reports (
+            report_id TEXT PRIMARY KEY, url TEXT NOT NULL,
+            data TEXT NOT NULL, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)""")
+        db.execute("INSERT OR REPLACE INTO reports (report_id, url, data) VALUES (?, ?, ?)",
+                   (report_id, url, json.dumps(result)))
+        db.commit()
+        db.close()
+    except Exception:
+        pass
+
     # Sync to Supabase
     sync_to_supabase(
         result, parser,
@@ -2428,7 +2442,7 @@ def main():
         report_id = params.get("id", [None])[0]
 
         # Validate report_id format (UUID)
-        if report_id and not re.match(r'^[a-f0-9\-]{36}$', report_id):
+        if report_id and not re.match(r'^[a-f0-9\-]{8,36}$', report_id):
             print("Status: 400")
             print("Content-Type: application/json")
             print()
