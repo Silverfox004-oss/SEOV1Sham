@@ -2461,6 +2461,20 @@ def main():
         return
 
     elif method == "POST":
+        # Rate limit check
+        try:
+            from rate_limiter import check_rate_limit
+            client_ip = os.environ.get("REMOTE_ADDR", "unknown")
+            allowed, retry_after = check_rate_limit(client_ip)
+            if not allowed:
+                print("Status: 429")
+                print("Content-Type: application/json")
+                print()
+                print(json.dumps({"error": f"Rate limit exceeded. Please try again in {retry_after} seconds.", "retry_after": retry_after}))
+                return
+        except ImportError:
+            pass  # rate_limiter not available, skip
+
         # Run analysis
         try:
             content_length = int(os.environ.get("CONTENT_LENGTH", 0))
@@ -2536,6 +2550,25 @@ def main():
         # Basic email format check if provided
         if contact_email and not re.match(r'^[^@\s]+@[^@\s]+\.[^@\s]+$', contact_email):
             contact_email = ""
+
+        # ---- Cache check: return recent scan if URL was analyzed within 24h ----
+        if not competitor_url:
+            cache_cutoff = (datetime.now(timezone.utc) - timedelta(hours=24)).isoformat()
+            cached = supabase_select("scans", {
+                "select": "full_report,report_id,scanned_at",
+                "url": f"eq.{url}",
+                "scanned_at": f"gte.{cache_cutoff}",
+                "order": "scanned_at.desc",
+                "limit": 1
+            })
+            if cached and cached[0].get("full_report"):
+                cached_report = cached[0]["full_report"]
+                cached_report["from_cache"] = True
+                cached_report["analyzed_at"] = cached[0].get("scanned_at", "")
+                print("Content-Type: application/json")
+                print()
+                print(json.dumps(cached_report))
+                return
 
         try:
             if competitor_url:
